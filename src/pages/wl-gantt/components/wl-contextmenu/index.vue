@@ -103,7 +103,7 @@ export default {
     margin: 0;
     font-size: 14px;
     color: #606266;
-    cursor: pointer;
+    cursor: default;
     &:hover {
       background: #ecf5ff;
       color: #66b1ff;
