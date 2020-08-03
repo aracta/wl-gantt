@@ -80,7 +80,7 @@
                 scope.row[selfProps.name]
                 }}
               </span>
-              <span class="name-col-edit">
+              <span v-if="edit" class="name-col-edit">
                 <i
                   class="el-icon-remove-outline name-col-icon task-remove"
                   @click="emitTaskRemove(scope.row)"
@@ -94,6 +94,7 @@
           </template>
         </el-table-column>
         <el-table-column
+          v-if="showStartDate"
           :resizable="false"
           fixed
           width="160"
@@ -123,6 +124,7 @@
           </template>
         </el-table-column>
         <el-table-column
+          v-if="showEndDate"
           fixed
           :resizable="false"
           width="160"
@@ -186,7 +188,7 @@
         </el-table-column>
         <slot></slot>
       </template>
-      <!-- year and mouth gantt -->
+      <!-- year and month gantt -->
       <template v-if="self_date_type === 'yearAndMonth'">
         <el-table-column
           :resizable="false"
@@ -224,8 +226,10 @@
             v-for="t in i.children"
             :resizable="false"
             :key="t.id"
-            :label="t.name"
           >
+      <template slot="header" slot-scope="scope">
+        2
+      </template>
             <template slot-scope="scope">
               <div :class="dayGanttType(scope.row, t.full_date, 'week')"></div>
               <div v-if="useRealTime" :class="realDayGanttType(scope.row, t.full_date, 'week')"></div>
@@ -233,7 +237,7 @@
           </el-table-column>
         </el-table-column>
       </template>
-      <!-- mouth and day gantt -->
+      <!-- month and day gantt -->
       <template v-else>
         <el-table-column
           :resizable="false"
@@ -247,6 +251,7 @@
             :resizable="false"
             :key="t.id"
             :label="t.name"
+			width="50"
           >
             <template slot-scope="scope">
               <div :class="dayGanttType(scope.row, t.full_date)"></div>
@@ -414,6 +419,14 @@ export default {
       type: Boolean,
       default: false
     }, // 是否只显示图形
+    showStartDate: {
+      type: Boolean,
+      default: false
+    }, // 是否显示开始时间
+    showEndDate: {
+      type: Boolean,
+      default: false
+    }, // 是否显示结束时间
     // ---------------------------------------------以下为el-table Attributes--------------------------------------------
     defaultExpandAll: {
       type: Boolean,
@@ -476,21 +489,21 @@ export default {
         .format("YYYY-M-D")
         .split("-");
       let start_year = Number(start_date_spilt[0]);
-      let start_mouth = Number(start_date_spilt[1]);
+      let start_month = Number(start_date_spilt[1]);
       let end_year = Number(end_date_spilt[0]);
-      let end_mouth = Number(end_date_spilt[1]);
+      let end_month = Number(end_date_spilt[1]);
       // 自动更新日期类型以适应任务时间范围跨度
       if (this.autoGanttDateType) {
         // 计算日期跨度
-        let mouth_diff = this.timeDiffTime(
+        let month_diff = this.timeDiffTime(
           this.self_start_date,
           this.self_end_date,
           "months"
         );
-        if (mouth_diff > 12) {
-          // 12个月以上的分到yearAndMouth
+        if (month_diff > 12) {
+          // 12个月以上的分到yearAndmonth
           this.self_date_type = "yearAndMonth";
-        } else if (mouth_diff > 2) {
+        } else if (month_diff > 2) {
           // 2个月以上的分到yearAndWeek
           this.self_date_type = "yearAndWeek";
         } else {
@@ -501,23 +514,23 @@ export default {
       if (this.self_date_type === "yearAndWeek") {
         return this.yearAndWeekTitleDate(
           start_year,
-          start_mouth,
+          start_month,
           end_year,
-          end_mouth
+          end_month
         );
       } else if (this.self_date_type === "monthAndDay") {
-        return this.mouthAndDayTitleDate(
+        return this.monthAndDayTitleDate(
           start_year,
-          start_mouth,
+          start_month,
           end_year,
-          end_mouth
+          end_month
         );
       } else {
-        return this.yearAndMouthTitleDate(
+        return this.yearAndmonthTitleDate(
           start_year,
-          start_mouth,
+          start_month,
           end_year,
-          end_mouth
+          end_month
         );
       }
     },
@@ -740,11 +753,11 @@ export default {
     /**
      * 年-月模式gantt标题
      * start_year: 起始年
-     * start_mouth：起始月
+     * start_month：起始月
      * end_year：结束年
-     * end_mouth：结束月
+     * end_month：结束月
      */
-    yearAndMouthTitleDate(start_year, start_mouth, end_year, end_mouth) {
+    yearAndmonthTitleDate(start_year, start_month, end_year, end_month) {
       // 日期数据盒子
       let dates = [
         {
@@ -759,48 +772,48 @@ export default {
       // 年间隔小于一年
       if (year_diff === 0) {
         let isLeap = this.isLeap(start_year); // 是否闰年
-        let mouths = this.generationMonths(
+        let months = this.generationMonths(
           start_year,
-          start_mouth,
-          end_mouth + 1,
+          start_month,
+          end_month + 1,
           isLeap,
           false
         ); // 处理月份
-        dates[0].children = mouths;
+        dates[0].children = months;
         return dates;
       }
       // 处理开始月份
       let startIsLeap = this.isLeap(start_year);
-      let start_mouths = this.generationMonths(
+      let start_months = this.generationMonths(
         start_year,
-        start_mouth,
+        start_month,
         13,
         startIsLeap,
         false
       );
       // 处理结束月份
       let endIsLeap = this.isLeap(end_year);
-      let end_mouths = this.generationMonths(
+      let end_months = this.generationMonths(
         end_year,
         1,
-        end_mouth + 1,
+        end_month + 1,
         endIsLeap,
         false
       );
       // 年间隔等于一年
       if (year_diff === 1) {
-        dates[0].children = start_mouths;
+        dates[0].children = start_months;
         dates.push({
           name: `${end_year}年`,
           date: end_year,
-          children: end_mouths,
+          children: end_months,
           id: uuidv4()
         });
         return dates;
       }
       // 年间隔大于1年
       if (year_diff > 1) {
-        dates[0].children = start_mouths;
+        dates[0].children = start_months;
         for (let i = 1; i < year_diff; i++) {
           let item_year = start_year + i;
           let isLeap = this.isLeap(item_year);
@@ -821,7 +834,7 @@ export default {
         dates.push({
           name: `${end_year}年`,
           date: end_year,
-          children: end_mouths,
+          children: end_months,
           id: uuidv4()
         });
         return dates;
@@ -830,32 +843,33 @@ export default {
     /**
      * 年-周模式gantt标题
      * start_year: 起始年
-     * start_mouth：起始月
+     * start_month：起始月
      * end_year：结束年
-     * end_mouth：结束月
+     * end_month：结束月
      */
-    yearAndWeekTitleDate(start_year, start_mouth, end_year, end_mouth) {
+    yearAndWeekTitleDate(start_year, start_month, end_year, end_month) {
       // 处理年份
       let year_diff = end_year - start_year;
       // 只存在同年或前后年的情况
       if (year_diff === 0) {
         // 年间隔为同一年
         let isLeap = this.isLeap(start_year); // 是否闰年
-        let mouths = this.generationMonths(
+        let months = this.generationMonths(
           start_year,
-          start_mouth,
-          end_mouth + 1,
+          start_month,
+          end_month + 1,
           isLeap,
           true,
           true
         ); // 处理月份
-        return mouths;
+		console.log(months)
+        return months;
       }
       // 处理开始月份
       let startIsLeap = this.isLeap(start_year);
-      let start_mouths = this.generationMonths(
+      let start_months = this.generationMonths(
         start_year,
-        start_mouth,
+        start_month,
         13,
         startIsLeap,
         true,
@@ -863,55 +877,55 @@ export default {
       );
       // 处理结束月份
       let endIsLeap = this.isLeap(end_year);
-      let end_mouths = this.generationMonths(
+      let end_months = this.generationMonths(
         end_year,
         1,
-        end_mouth + 1,
+        end_month + 1,
         endIsLeap,
         true,
         true
       );
-      return start_mouths.concat(end_mouths);
+      return start_months.concat(end_months);
     },
     /**
      * 月-日模式gantt标题
      * start_year: 起始年
-     * start_mouth：起始月
+     * start_month：起始月
      * end_year：结束年
-     * end_mouth：结束月
+     * end_month：结束月
      */
-    mouthAndDayTitleDate(start_year, start_mouth, end_year, end_mouth) {
+    monthAndDayTitleDate(start_year, start_month, end_year, end_month) {
       // 处理年份
       let year_diff = end_year - start_year;
       // 只存在同年或前后年的情况
       if (year_diff === 0) {
         // 年间隔为同一年
         let isLeap = this.isLeap(start_year); // 是否闰年
-        let mouths = this.generationMonths(
+        let months = this.generationMonths(
           start_year,
-          start_mouth,
-          end_mouth + 1,
+          start_month,
+          end_month + 1,
           isLeap
         ); // 处理月份
-        return mouths;
+        return months;
       }
       // 处理开始月份
       let startIsLeap = this.isLeap(start_year);
-      let start_mouths = this.generationMonths(
+      let start_months = this.generationMonths(
         start_year,
-        start_mouth,
+        start_month,
         13,
         startIsLeap
       );
       // 处理结束月份
       let endIsLeap = this.isLeap(end_year);
-      let end_mouths = this.generationMonths(
+      let end_months = this.generationMonths(
         end_year,
         1,
-        end_mouth + 1,
+        end_month + 1,
         endIsLeap
       );
-      return start_mouths.concat(end_mouths);
+      return start_months.concat(end_months);
     },
     /**
      * 生成月份函数
@@ -1766,13 +1780,13 @@ $gantt_item_half: 8px;
     left: 50%;
     &:after {
       position: absolute;
-      top: $gantt_item;
+      bottom: $gantt_item;
       left: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
-      border-color: #409eff transparent transparent;
+      border-color: transparent transparent #409eff;
       border-width: 6px 6px 6px 0;
       border-style: solid;
     }
@@ -1782,14 +1796,14 @@ $gantt_item_half: 8px;
     right: 50%;
     &:after {
       position: absolute;
-      top: $gantt_item;
+      bottom: $gantt_item;
       right: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
       border-color: transparent #409eff;
-      border-width: 0 6px 6px 0;
+      border-width: 6px 6px 0 0;
       border-style: solid;
     }
   }
@@ -1801,7 +1815,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       left: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1813,7 +1827,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       right: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1841,7 +1855,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       left: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1857,7 +1871,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       right: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1874,7 +1888,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       left: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1886,7 +1900,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       right: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1932,7 +1946,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       left: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1948,7 +1962,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       right: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1965,7 +1979,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       left: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
@@ -1977,7 +1991,7 @@ $gantt_item_half: 8px;
       position: absolute;
       top: $gantt_item;
       right: 0;
-      z-index: 1;
+      /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
