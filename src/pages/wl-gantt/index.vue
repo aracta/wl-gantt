@@ -228,8 +228,8 @@
             :key="t.id"
           >
             <template slot="header" slot-scope="scope">
-              <div>{{t.name}}</div>
-              <div v-if="showWeekDay">{{dateToWeekDay(t.full_date)}}</div>
+              <div :class="isWeekend(t.full_date)">{{t.name}}</div>
+              <div v-if="showWeekDay" :class="isWeekend(t.full_date)">{{dateToWeekDay(t.full_date)}}</div>
             </template>
             <template slot-scope="scope">
               <div :class="dayGanttType(scope.row, t.full_date, 'week')"></div>
@@ -254,8 +254,8 @@
             width="50"
           >
             <template slot="header" slot-scope="scope">
-              <div>{{t.name}}</div>
-              <div v-if="showWeekDay">{{dateToWeekDay(t.full_date)}}</div>
+              <div :class="isWeekend(t.full_date)">{{t.name}}</div>
+              <div v-if="showWeekDay" :class="isWeekend(t.full_date)">{{dateToWeekDay(t.full_date)}}</div>
             </template>
             <template slot-scope="scope">
               <div :class="dayGanttType(scope.row, t.full_date)"></div>
@@ -1119,10 +1119,10 @@ export default {
       return dayjs(date).day();
     },
     /**
-     * 返回中文周几
+     * 返回中文星期几
      */
     dateToWeekDay(date) {
-      switch(dayjs(date).day()){
+      switch(this.timeInWeek(date)){
         case 0:
           return '星期日'
         case 1:
@@ -1138,6 +1138,15 @@ export default {
         case 6:
           return '星期六'
       }
+    },
+    /**
+     * 返回是否周末
+     */
+    isWeekend(date) {
+      if (this.timeInWeek(date) && this.timeInWeek(date) < 6) {
+        return 'weekday'
+      }
+      return 'weekend'
     },
     // 以下为输出数据函数 --------------------------------------------------------------输出数据------------------------------------
     // 删除任务
@@ -1786,6 +1795,10 @@ $gantt_item_half: 8px;
     transition: all 0.3s;
     > .cell {
       padding: 0!important;
+      > .weekend {
+        color: green;
+        font-weight: bold;
+      }
     }
   }
 
