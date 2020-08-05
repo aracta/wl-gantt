@@ -1855,26 +1855,26 @@ $gantt_item_half: 8px;
     right: 0;
     &:before {
       position: absolute;
-      top: $gantt_item;
+      bottom: $gantt_item;
       left: 0;
       /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
-      border-color: #409eff transparent transparent;
-      border-width: 6px 6px 6px 0;
+      border-color: transparent transparent #409eff #409eff;
+      border-width: 6px 0 0 6px;
       border-style: solid;
     }
     &:after {
       position: absolute;
-      top: $gantt_item;
+      bottom: $gantt_item;
       right: 0;
       /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
       border-color: transparent #409eff;
-      border-width: 0 6px 6px 0;
+      border-width: 6px 6px 0 0;
       border-style: solid;
     }
   }
@@ -1986,7 +1986,7 @@ $gantt_item_half: 8px;
     left: 5%;
     &:after {
       position: absolute;
-      top: $gantt_item;
+      bottom: $gantt_item;
       left: 0;
       /*z-index: 1;*/
       content: "";
@@ -2002,7 +2002,7 @@ $gantt_item_half: 8px;
     right: 5%;
     &:after {
       position: absolute;
-      top: $gantt_item;
+      bottom: $gantt_item;
       right: 0;
       /*z-index: 1;*/
       content: "";
@@ -2019,19 +2019,19 @@ $gantt_item_half: 8px;
     right: 5%;
     &:before {
       position: absolute;
-      top: $gantt_item;
+      bottom: $gantt_item;
       left: 0;
       /*z-index: 1;*/
       content: "";
       width: 0;
       height: 0;
-      border-color: #409eff transparent transparent;
-      border-width: 6px 6px 6px 0;
+      border-color: transparent transparent #409eff #409eff;
+      border-width: 0 6px 6px 0;
       border-style: solid;
     }
     &:after {
       position: absolute;
-      top: $gantt_item;
+      bottom: $gantt_item;
       right: 0;
       /*z-index: 1;*/
       content: "";
