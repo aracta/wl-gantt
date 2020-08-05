@@ -6,13 +6,18 @@
         ref="wl-gantt-demo"
         lazy
         use-real-time
-        use-check-column
-        use-index-column
-        end-date="2019-11-02"
-        start-date="2009-9-06"
+        start-date="2019-09-01"
+        end-date="2019-10-30"
         date-type="monthAndDay"
+		default-expand-all
+		:showWeekDay="true"
+		:autoGanttDateType="false"
+		:checkSource="true"
         :data="data"
         :contextMenuOptions="contextMenuOptions"
+		:ganttOnly="false"
+		:edit="false"
+		:showEndDate="false"
         @selection-change="selectionChange"
         @expand-change="expandChange"
         @timeChange="timeChange"
@@ -39,15 +44,16 @@ export default {
           name: "旅行",
           startDate: "2019-09-07",
           realStartDate: "2019-09-10",
-          endDate: "2019-10-31",
-          realEndDate: "2019-10-19",
+          endDate: "2019-10-19",
+          realEndDate: "2019-10-22",
           children: [
             {
               id: "1-1",
               pid: "1",
               name: "云台之间",
               startDate: "2019-09-10",
-              endDate: "2019-09-13",
+              realStartDate: "2019-09-10",
+              endDate: "2019-09-10",
               children: [
                 {
                   id: "1-1-1",
@@ -55,6 +61,13 @@ export default {
                   name: "日落云巅",
                   startDate: "2019-09-10",
                   endDate: "2019-09-13"
+                },
+                {
+                  id: "1-1-2",
+                  pid: "1-1",
+                  name: "剑指华山",
+                  startDate: "2019-09-10",
+                  endDate: "2019-09-10"
                 }
               ]
             },
